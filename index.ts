@@ -39,7 +39,10 @@ const octokit = new Octokit({
     }))
 
     const comments = issueComments
-      .map((comment) => `${dateStringToLocalTime(comment.created_at)} ${comment.body}`)
+      .map((comment) => {
+        const user = comment.user && comment.user.login !== userName ? ` (@${comment.user?.login})` : '';
+        return `${dateStringToLocalTime(comment.created_at)}${user} ${comment.body}`;
+      })
       .join('\n');
 
     const dayTitle = issue.title.replaceAll('-', '/').replaceAll(' ', '_');
