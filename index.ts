@@ -9,11 +9,14 @@ const repository = process.env.REPOSITORY;
 const contentPathPrefix = process.env.CONTENT_DIR || '';
 const userName = process.env.ASSIGN_USER || undefined;
 const diaryLabel = process.env.ISSUE_LABEL || undefined;
+const targetDayOffsetString = process.env.TARGET_DAY_OFFSET;
 
 if (repository === undefined) {
   console.error('REPOSITORY environment variable is not set.');
   process.exit(1);
 }
+
+const targetDayOffset = parseInt(targetDayOffsetString || '') || 0;
 
 const [repoOwner, repoName] = repository.split('/')
 
@@ -24,6 +27,7 @@ const octokit = new Octokit({
 
 (async () => {
   const now = new Date();
+  now.setHours(now.getHours() + 9); // convert ISOString (UTC) to JST
   const issueList = await octokit.paginate(octokit.issues.listForRepo, {
     owner: repoOwner,
     repo: repoName,
@@ -46,7 +50,7 @@ const octokit = new Octokit({
       .join('\n');
 
     const dayTitle = issue.title.replaceAll(' ', '_');
-    const filePath = `${contentPathPrefix}${dayTitle}.txt`;
+    const filePath = `${dayTitle}.txt`;
     const dirName = filePath.split('/').slice(0, -1).join('/');
     const body = `${issue.body}\n\n${comments}\n`;
 
@@ -69,8 +73,8 @@ const octokit = new Octokit({
     }
   });
 
-  const tomorrow = new Date(now.getTime());
-  tomorrow.setDate(tomorrow.getDate() + 1);
+  const targetDay = new Date(now.getTime());
+  targetDay.setDate(targetDay.getDate() + targetDayOffset);
 
   const startOfYear = new Date(now.getTime());
   startOfYear.setMonth(0);
@@ -78,7 +82,7 @@ const octokit = new Octokit({
   const startOfNextYear = new Date(startOfYear.getTime());
   startOfNextYear.setFullYear(startOfNextYear.getFullYear() + 1);
 
-  const dayOfYear = ((tomorrow.getTime() - startOfYear.getTime()) / 1000 / 60 / 60 / 24) + 1;
+  const dayOfYear = ((targetDay.getTime() - startOfYear.getTime()) / 1000 / 60 / 60 / 24) + 1;
   const totalDayOfThisYear = (startOfNextYear.getTime() - startOfYear.getTime()) / 1000 / 60 / 60 / 24;
 
   if (!dryRun) {
@@ -88,7 +92,7 @@ const octokit = new Octokit({
     const issueOpenResult = await octokit.issues.create({
       owner: repoOwner,
       repo: repoName,
-      title: tomorrow.toISOString().slice(0, 10).replaceAll('-', '/'),
+      title: `${contentPathPrefix}${targetDay.toISOString().slice(0, 10).replaceAll('-', '/')}`,
       body: `day of year: ${dayOfYear} / ${totalDayOfThisYear} (${(dayOfYear / totalDayOfThisYear * 100).toFixed(1)}%)`,
       labels,
       assignees,

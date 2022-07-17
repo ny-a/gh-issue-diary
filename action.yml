@@ -16,7 +16,10 @@ inputs:
     description: 'username to assign diary issues.'
   issue_label:
     description: 'label name for diary issue.'
-  
+  target_day_offset:
+    description: 'target day offset in days.'
+    default: '1'
+
 
 runs:
   using: "composite"
@@ -42,6 +45,7 @@ runs:
         CONTENT_DIR: ${{ inputs.content_dir }}
         ASSIGN_USER: ${{ inputs.assign_user }}
         ISSUE_LABEL: ${{ inputs.issue_label }}
+        TARGET_DAY_OFFSET: ${{ inputs.target_day_offset }}
       shell: bash
       run: |
         node ${{ github.action_path }}/index.js
