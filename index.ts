@@ -45,7 +45,7 @@ const octokit = new Octokit({
       })
       .join('\n');
 
-    const dayTitle = issue.title.replaceAll('-', '/').replaceAll(' ', '_');
+    const dayTitle = issue.title.replaceAll(' ', '_');
     const filePath = `${contentPathPrefix}${dayTitle}.txt`;
     const dirName = filePath.split('/').slice(0, -1).join('/');
     const body = `${issue.body}\n\n${comments}\n`;
@@ -88,7 +88,7 @@ const octokit = new Octokit({
     const issueOpenResult = await octokit.issues.create({
       owner: repoOwner,
       repo: repoName,
-      title: tomorrow.toISOString().slice(0, 10),
+      title: tomorrow.toISOString().slice(0, 10).replaceAll('-', '/'),
       body: `day of year: ${dayOfYear} / ${totalDayOfThisYear} (${(dayOfYear / totalDayOfThisYear * 100).toFixed(1)}%)`,
       labels,
       assignees,
