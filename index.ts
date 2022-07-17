@@ -46,12 +46,13 @@ const octokit = new Octokit({
       .join('\n');
 
     const dayTitle = issue.title.replaceAll('-', '/').replaceAll(' ', '_');
-    const monthTitle = dayTitle.slice(0, 7);
-    const dirName = `${contentPathPrefix}${monthTitle}`;
     const filePath = `${contentPathPrefix}${dayTitle}.txt`;
+    const dirName = filePath.split('/').slice(0, -1).join('/');
     const body = `${issue.body}\n\n${comments}\n`;
 
-    fs.mkdirSync(dirName, { recursive: true })
+    if (dirName !== '') {
+      fs.mkdirSync(dirName, { recursive: true });
+    }
     fs.appendFileSync(filePath, body);
 
     if (!dryRun) {
