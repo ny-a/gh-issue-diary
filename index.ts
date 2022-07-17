@@ -42,7 +42,7 @@ const octokit = new Octokit({
       .map((comment) => `${dateStringToLocalTime(comment.created_at)} ${comment.body}`)
       .join('\n');
 
-    const dayTitle = issue.title.replaceAll('-', '/');
+    const dayTitle = issue.title.replaceAll('-', '/').replaceAll(' ', '_');
     const monthTitle = dayTitle.slice(0, 7);
     const dirName = `${contentPathPrefix}${monthTitle}`;
     const filePath = `${contentPathPrefix}${dayTitle}.txt`;
