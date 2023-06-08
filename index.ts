@@ -2,6 +2,8 @@ import { Octokit } from "@octokit/rest";
 import fs from 'fs';
 import * as process from 'process';
 
+const dayNameAbbrev = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
 const GH_TOKEN = process.env.GH_TOKEN;
 const dryRun = process.env.DRY_RUN === 'true';
 
@@ -93,7 +95,8 @@ const octokit = new Octokit({
       owner: repoOwner,
       repo: repoName,
       title: `${contentPathPrefix}${targetDay.toISOString().slice(0, 10).replaceAll('-', '/')}`,
-      body: `day of year: ${dayOfYear} / ${totalDayOfThisYear} (${(dayOfYear / totalDayOfThisYear * 100).toFixed(1)}%)`,
+      body: `${targetDay.toISOString().slice(0, 10)} (${dayNameAbbrev[targetDay.getDay()]}.)
+day of year: ${dayOfYear} / ${totalDayOfThisYear} (${(dayOfYear / totalDayOfThisYear * 100).toFixed(1)}%)`,
       labels,
       assignees,
     })
